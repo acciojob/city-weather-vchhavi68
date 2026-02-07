@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import axios from "axios";
 
@@ -7,21 +8,30 @@ function App() {
   const [query, setQuery] = useState("");
   const [weather, setWeather] = useState(null);
 
-  const search = async (e) => {
+  const search = (e) => {
     if (e.key === "Enter") {
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}`
-      );
-      setWeather(response.data);
-      setQuery("");
+      axios
+        .get(
+          `https://api.openweathermap.org/data/2.5/weather?q=${query}&appid=${API_KEY}`
+        )
+        .then((response) => {
+          setWeather(response.data);
+          setQuery("");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   };
 
-  const kelvinToFahrenheit = (k) => ((k - 273.15) * 9) / 5 + 32;
+  const kelvinToFahrenheit = (k) => {
+    return ((k - 273.15) * 9) / 5 + 32;
+  };
 
   return (
     <div className="app">
       <input
+        data-testid="search-input"
         type="text"
         className="search"
         placeholder="Enter a city"
@@ -29,13 +39,19 @@ function App() {
         onChange={(e) => setQuery(e.target.value)}
         onKeyPress={search}
       />
+
       {weather && (
         <div className="weather">
           <div className="city">{weather.name}</div>
+
           <div className="temperature">
             {Math.round(kelvinToFahrenheit(weather.main.temp))}°F
           </div>
-          <div className="description">{weather.weather[0].description}</div>
+
+          <div className="description">
+            {weather.weather[0].description}
+          </div>
+
           <div className="icon">
             <img
               src={`http://openweathermap.org/img/w/${weather.weather[0].icon}.png`}
